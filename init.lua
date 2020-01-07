@@ -50,12 +50,42 @@ local function foreach_device(fn)
 end
 ---}}}
 
+--{{{ Icons
+local icon_theme = lgi.Gtk.IconTheme.get_default()
+local IconLookupFlags = lgi.Gtk.IconLookupFlags
+
+local function lookup_icon(name)
+    return icon_theme:lookup_icon(name, 64, {IconLookupFlags.GENERIC_FALLBACK})
+end
+
+local icon = {
+    ethernet = lookup_icon("network-wired-symbolic"),
+    wifi = lookup_icon("network-wireless-symbolic"),
+    offline = lookup_icon("network-offline-symbolic"),
+}
+
+local function get_device_icon(device)
+    if device:get_device_type() == "ETHERNET" then return icon.ethernet end
+    if device:get_device_type() == "WIFI" then return icon.wifi end
+end
+--{{{
+
 --- {{{ Widget
 local function get_or_create_device_widget(container, device)
     -- cache widget by name
     local device_name = get_device_name(device)
     container._private[device_name] = container._private[device_name] or wibox.widget {
-        widget = wibox.widget.textbox
+        layout = wibox.layout.fixed.horizontal,
+        spacing = 2,
+        {
+            id = "imagebox",
+            widget = wibox.widget.imagebox,
+            resize = true,
+        },
+        {
+            id = "textbox",
+            widget = wibox.widget.textbox,
+        }        
     }
 
     return container._private[device_name]
@@ -63,8 +93,10 @@ end
 
 local function update_device(widget, device)
     local ips4 = get_device_ip4(device)
+    local icon = get_device_icon(device)
     
-    widget.text = string.format("%s (%s)", get_device_name(device),  table.concat(ips4,","))
+    widget.imagebox.image = icon:load_surface()
+    widget.textbox.text = table.concat(ips4,",")
     widget.visible = visibility_filter(device)
 end
 
