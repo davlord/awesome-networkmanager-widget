@@ -1,6 +1,7 @@
 local lgi = require 'lgi'
 local GLib = lgi.GLib
 local NM = lgi.NM
+local awful = require("awful")
 local wibox = require("wibox")
 
 local network = { mt = {} }
@@ -71,10 +72,8 @@ end
 --{{{
 
 --- {{{ Widget
-local function get_or_create_device_widget(container, device)
-    -- cache widget by name
-    local device_name = get_device_name(device)
-    container._private[device_name] = container._private[device_name] or wibox.widget {
+local function create_device_widget()
+    local widget = wibox.widget {
         layout = wibox.layout.fixed.horizontal,
         spacing = 2,
         {
@@ -87,6 +86,15 @@ local function get_or_create_device_widget(container, device)
             widget = wibox.widget.textbox,
         }        
     }
+    widget.tooltip = awful.tooltip({ objects = { widget },})
+
+    return widget
+end
+
+local function get_or_create_device_widget(container, device)
+    -- cache widget by name
+    local device_name = get_device_name(device)
+    container._private[device_name] = container._private[device_name] or create_device_widget()
 
     return container._private[device_name]
 end
@@ -100,12 +108,22 @@ local function update_device(widget, device)
     widget.visible = visibility_filter(device)
 end
 
+local function update_tooltip(widget, device)
+    local name = get_device_name(device)
+    local mac = device:get_hw_address()
+    local driver = device:get_driver()
+
+    local text = string.format("%s (%s)\n%s", name, driver, mac)
+    widget.tooltip:set_text(text)
+end
+
 local function update(container)
     container:reset()
     foreach_device(function(device)
         local device_widget = get_or_create_device_widget(container, device)
         container:add(device_widget)
         update_device(device_widget, device)
+        update_tooltip(device_widget, device)
     end)
 end
 
