@@ -5,8 +5,7 @@ local awful = require("awful")
 local wibox = require("wibox")
 
 local network = { mt = {} }
-
-local nm = NM.Client.new()
+local nm = nil
 
 ---{{{ Device helper
 local function get_device_name(device)
@@ -127,10 +126,8 @@ local function update(container)
     end)
 end
 
-local function new()
-
-    local container = wibox.layout.fixed.horizontal()
-    container.spacing = 2
+local function init(nm_new_res, container)
+    nm = NM.Client.new_finish(nm_new_res)
 
     function nm:on_active_connection_added(connection) 
         connection.on_state_changed = function() update(container) end
@@ -138,8 +135,22 @@ local function new()
     function nm:on_active_connection_removed(connection) 
         update(container)
     end
+
+    function nm:on_device_added()
+        update(container)
+    end
+    function nm:on_device_removed()
+        update(container)
+    end
    
     update(container)
+end
+
+local function new()
+    local container = wibox.layout.fixed.horizontal()
+    container.spacing = 2
+
+    NM.Client.new_async(nil, function(src, res) init(res, container) end)    
 
     return container
 end
