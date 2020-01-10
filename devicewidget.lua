@@ -18,15 +18,8 @@ function devicewidget:set_mode(mode)
     self._private.mode = mode
 end
 
-function devicewidget:get_device_ips(device)
-    if self._private.mode == devicewidget.MODE_IP4 then return devicehelper.get_device_ip4(device)
-    elseif self._private.mode == devicewidget.MODE_IP6 then return devicehelper.get_device_ip6(device)
-    else return {}
-    end
-end
-
 function devicewidget:update_widget(device)
-    local ips = self:get_device_ips(device)
+    local ips = devicehelper.get_ips(device, self._private.mode)
     local icon = iconhelper.get_device_icon(device)
     local is_visible = visibility_filter(device)    
 
@@ -43,11 +36,18 @@ function devicewidget:update_widget(device)
 end
 
 function devicewidget:update_tooltip(device)
-    local name = devicehelper.get_device_name(device)
+    local device_name = devicehelper.get_device_name(device)
+    local device_driver = device:get_driver()
     local mac = device:get_hw_address()
-    local driver = device:get_driver()
+    local nameservers = devicehelper.get_nameservers(device, self._private.mode)
+    local domains = devicehelper.get_domains(device, self._private.mode)
 
-    local text = string.format("%s (%s)\n%s", name, driver, mac)
+    local text_device = string.format("%s (%s)", device_name, device_driver)
+    local text_gateway = string.format("gateway: %s", devicehelper.get_gateway(device, self._private.mode) or "")
+    local text_domains = next(domains) and string.format(" (%s)", table.concat(domains, ", ")) or ""
+    local text_dns = string.format("dns: %s%s", table.concat(nameservers, ", "), text_domains)
+
+    local text = string.format("%s\n%s\n\n%s\n%s", text_device, mac, text_dns, text_gateway )
     self.tooltip:set_text(text)
 end
 
