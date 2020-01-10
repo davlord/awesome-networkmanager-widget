@@ -7,6 +7,7 @@ A network-manager widget for Awesome WM
 
 * Lightweight (no constant polling but event based updates)
 * Support multiple devices
+* Toggle between IP4/IP6 display on left click
 * Additional details on tooltip
 
 ## install
