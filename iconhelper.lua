@@ -11,7 +11,7 @@ end
 
 local icon = {
     ethernet = lookup_icon("network-wired-symbolic"),
-    wifi = lookup_icon("network-wireless-symbolic"),
+    wifi = lookup_icon("network-wireless-connected-symbolic"),
     offline = lookup_icon("network-offline-symbolic"),
 }
 

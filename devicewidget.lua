@@ -30,8 +30,8 @@ function devicewidget:update_widget(device)
         ip_text = table.concat(ips,", ")
     end
 
-    self.imagebox.image = icon:load_surface()
-    self.textbox.text = ip_text
+    self.imagebox:set_image(icon:load_surface())
+    self.textbox:set_text(ip_text)
     self:set_visible(is_visible)
 end
 
