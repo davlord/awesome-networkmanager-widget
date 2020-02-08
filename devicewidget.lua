@@ -30,7 +30,7 @@ function devicewidget:update_widget(device)
         ip_text = table.concat(ips,", ")
     end
 
-    self.imagebox:set_image(icon:load_surface())
+    self.imageboxcontainer.imagebox:set_image(icon:load_surface())
     self.textbox:set_text(ip_text)
     self:set_visible(is_visible)
 end
@@ -61,9 +61,15 @@ local function new(args)
         layout = wibox.layout.fixed.horizontal,
         spacing = 2,
         {
-            id = "imagebox",
-            widget = wibox.widget.imagebox,
-            resize = true,
+            top    = 3,
+            bottom = 3,
+            layout = wibox.container.margin,
+            id = "imageboxcontainer",
+            {
+                id = "imagebox",
+                widget = wibox.widget.imagebox,
+                resize = true,
+            },
         },
         {
             id = "textbox",
